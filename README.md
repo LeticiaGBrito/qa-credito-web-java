@@ -1,10 +1,13 @@
 # QA Crédito Web — Java
 
+[![Testes Web Java](https://github.com/LeticiaGBrito/qa-credito-web-java/actions/workflows/testes-web.yml/badge.svg?branch=main)](https://github.com/LeticiaGBrito/qa-credito-web-java/actions/workflows/testes-web.yml)
+
 Projeto educacional de automação de testes web com Java, Selenium,
 JUnit 5 e Gradle.
 
 Inclui um simulador de análise fictícia de crédito, servidor próprio,
-documentação Swagger e captura automática de tela em caso de falha.
+documentação Swagger, captura automática de tela em caso de falha
+e execução dos testes no GitHub Actions.
 
 A aplicação e suas regras não representam políticas reais de
 concessão de crédito e não possuem vínculo com empresas.
@@ -27,6 +30,7 @@ Demonstrar a automação de uma jornada pelo navegador, contemplando:
 - Execução com navegador visível ou em modo headless.
 - Relatórios HTML e JUnit XML.
 - Captura de tela em falhas.
+- Integração contínua com GitHub Actions.
 
 ## Execução independente
 
@@ -37,6 +41,8 @@ para executar o simulador ou a suíte Java.
 
 Durante os testes do simulador, a aplicação é iniciada
 automaticamente em uma porta local disponível.
+
+Os testes não dependem de uma aplicação hospedada externamente.
 
 ## Tecnologias e finalidade
 
@@ -53,8 +59,11 @@ automaticamente em uma porta local disponível.
 | HTML, CSS e JavaScript | Interface e validações do formulário |
 | Swagger UI | Documentação interativa e envio manual de requisições |
 | OpenAPI 3.1 | Descrição dos endpoints, modelos e exemplos |
+| GitHub Actions | Execução automática dos testes e armazenamento dos relatórios |
 
 As versões das dependências estão definidas em `build.gradle`.
+
+A versão do Gradle é definida na configuração do Gradle Wrapper.
 
 ## Organização e responsabilidade dos arquivos
 
@@ -91,12 +100,13 @@ As versões das dependências estão definidas em `build.gradle`.
 | `settings.gradle` | Define o nome do projeto Gradle |
 | `gradlew` e `gradlew.bat` | Permitem executar o Gradle pelo Wrapper |
 | `gradle/wrapper/` | Contém a configuração e os arquivos do Gradle Wrapper |
+| `.github/workflows/testes-web.yml` | Configura a execução dos testes no GitHub Actions |
 | `.gitignore` | Exclui arquivos gerados e configurações locais do versionamento |
 | `.gitattributes` | Padroniza o tratamento de arquivos e quebras de linha |
 
 ## Estratégia de testes
 
-O simulador possui **24 cenários automatizados**:
+A suíte completa possui **25 testes**:
 
 | Grupo | Quantidade |
 | --- | ---: |
@@ -104,15 +114,12 @@ O simulador possui **24 cenários automatizados**:
 | Campos obrigatórios | 4 |
 | Dados inválidos | 10 |
 | Formatos decimais e limpeza | 4 |
-| **Total do simulador** | **24** |
+| Verificação do ambiente Selenium | 1 |
+| **Total** | **25** |
+
+São **24 cenários do simulador** e **1 teste de ambiente**.
 
 A contagem inclui as execuções dos testes parametrizados.
-
-O projeto também mantém um teste separado de verificação do ambiente:
-`AmbienteWebTest`.
-
-Assim, executar toda a suíte com `gradlew test`, sem filtros,
-inclui **25 testes**: 24 do simulador e 1 do ambiente.
 
 ### Aprovação e reprovação
 
@@ -156,6 +163,13 @@ pela validação de formato.
 - Limpeza dos campos e ocultação do resultado.
 - Remoção das mensagens e marcações de erro.
 
+### Verificação do ambiente
+
+O teste `AmbienteWebTest` abre uma página simples incluída no
+próprio teste e verifica se o Selenium consegue controlar o Chrome.
+
+Ele não depende do simulador nem de uma página externa.
+
 ### Ciclo de execução
 
 Para cada classe que herda de `BaseWebTest`:
@@ -182,9 +196,45 @@ Não é necessário instalar o Gradle separadamente.
 O projeto foi validado localmente no Windows, com Chrome visível
 e em modo headless.
 
-## Executar os 24 testes do simulador
+A suíte completa também foi executada com sucesso no GitHub Actions,
+utilizando Ubuntu, Java 17 e Chrome em modo headless.
+
+## Executar toda a suíte
 
 Execute os comandos na raiz do projeto.
+
+Inclui os 24 cenários do simulador e o teste de ambiente.
+
+### Windows PowerShell
+
+```powershell
+.\gradlew.bat test
+```
+
+### Linux ou macOS
+
+```bash
+bash ./gradlew test
+```
+
+Não é necessário iniciar a aplicação manualmente.
+
+Se as entradas e saídas estiverem atualizadas, o Gradle pode
+informar `UP-TO-DATE`, reutilizando o resultado anterior.
+
+Para forçar uma nova execução no Windows:
+
+```powershell
+.\gradlew.bat test --rerun-tasks
+```
+
+No Linux ou macOS:
+
+```bash
+bash ./gradlew test --rerun-tasks
+```
+
+## Executar somente os 24 testes do simulador
 
 ### Windows PowerShell
 
@@ -202,39 +252,18 @@ bash ./gradlew test \
   --tests "credito.ComportamentoFormularioTest"
 ```
 
-Não é necessário iniciar a aplicação manualmente.
-
-## Executar toda a suíte
-
-Inclui os 24 cenários do simulador e o teste de ambiente.
-
-### Windows PowerShell
-
-```powershell
-.\gradlew.bat test
-```
-
-### Linux ou macOS
-
-```bash
-bash ./gradlew test
-```
-
-Se as entradas e saídas estiverem atualizadas, o Gradle pode
-informar `UP-TO-DATE`, reutilizando o resultado anterior.
-
-Para forçar uma nova execução:
-
-```powershell
-.\gradlew.bat test --rerun-tasks
-```
-
 ## Executar uma classe específica
 
 Exemplo no Windows PowerShell:
 
 ```powershell
 .\gradlew.bat test --tests "credito.DadosInvalidosTest"
+```
+
+No Linux ou macOS:
+
+```bash
+bash ./gradlew test --tests "credito.DadosInvalidosTest"
 ```
 
 O relatório dessa execução apresenta os testes selecionados.
@@ -278,7 +307,7 @@ O Gradle gera:
 | `build/reports/tests/test/index.html` | Resumo HTML, resultados e detalhes dos testes |
 | `build/test-results/test/` | Resultados XML compatíveis com ferramentas de CI |
 
-Para abrir o relatório no Windows PowerShell:
+Para abrir o relatório local no Windows PowerShell:
 
 ```powershell
 Start-Process ".\build\reports\tests\test\index.html"
@@ -287,7 +316,10 @@ Start-Process ".\build\reports\tests\test\index.html"
 O relatório apresenta quantidade de testes, falhas, testes ignorados,
 duração e resultados por classe.
 
-Os relatórios são gerados localmente e não são versionados.
+Os relatórios são arquivos gerados e não são versionados.
+
+No GitHub Actions, eles são disponibilizados como artefatos
+da execução.
 
 ## Evidências de falha
 
@@ -328,6 +360,81 @@ removido após a confirmação.
 O comando `gradlew clean` remove a pasta `build`, incluindo
 relatórios e capturas anteriores.
 
+## Integração contínua com GitHub Actions
+
+O workflow está definido em:
+
+```text
+.github/workflows/testes-web.yml
+```
+
+A execução é iniciada:
+
+- A cada push na branch `main`.
+- Em pull requests direcionados à branch `main`.
+- Manualmente pela opção `Run workflow` na aba `Actions`.
+
+### Etapas da execução
+
+1. Baixar o código do repositório.
+2. Configurar o Java 17, distribuição Eclipse Temurin.
+3. Configurar o cache de dependências do Gradle.
+4. Conferir as versões do Java e do Chrome.
+5. Permitir a execução do Gradle Wrapper.
+6. Compilar o projeto e executar os 25 testes em modo headless.
+7. Disponibilizar os relatórios e as capturas geradas.
+
+O ambiente utiliza `ubuntu-24.04` e a variável `HEADLESS=true`.
+
+O comando executado é:
+
+```bash
+./gradlew --no-daemon --console=plain clean test
+```
+
+A aplicação utilizada pelos testes é iniciada automaticamente
+no próprio ambiente do GitHub Actions.
+
+### Resultado validado
+
+A execução inicial no GitHub Actions concluiu os 25 testes
+com sucesso, sem falhas e sem testes ignorados.
+
+Esse resultado corresponde aos cenários implementados e
+não significa ausência de defeitos ou cobertura total.
+
+### Baixar o relatório
+
+1. Acesse a aba `Actions` do repositório.
+2. Selecione uma execução do workflow `Testes Web Java`.
+3. Na seção `Artifacts`, baixe `relatorios-testes-web-java`.
+4. Extraia todo o arquivo ZIP.
+5. Abra o arquivo `reports/tests/test/index.html` dentro
+   da pasta extraída.
+
+Mantenha os arquivos e as pastas extraídos juntos para preservar
+os estilos e a navegação do relatório.
+
+O artefato inclui os arquivos existentes nestes caminhos:
+
+- `build/reports/tests/test/`
+- `build/test-results/test/`
+- `build/evidencias/screenshots/`
+
+As capturas são incluídas somente quando forem geradas.
+
+O envio do artefato é tentado mesmo quando uma etapa anterior falha.
+A disponibilidade dos arquivos depende do ponto em que ocorreu a falha.
+
+A retenção dos artefatos está configurada para **14 dias**.
+
+### Escopo da integração
+
+A configuração atual implementa integração contínua: compilação,
+execução dos testes e disponibilização dos resultados.
+
+Ainda não realiza implantação automática da aplicação.
+
 ## Executar o simulador manualmente
 
 ### Windows PowerShell
@@ -346,10 +453,12 @@ Endereços padrão:
 
 | Recurso | Endereço |
 | --- | --- |
-| Simulador | http://127.0.0.1:8080/simulador |
-| Swagger UI | http://127.0.0.1:8080/docs |
-| Especificação OpenAPI | http://127.0.0.1:8080/openapi.json |
-| Disponibilidade | http://127.0.0.1:8080/health |
+| Simulador | [http://127.0.0.1:8080/simulador](http://127.0.0.1:8080/simulador) |
+| Swagger UI | [http://127.0.0.1:8080/docs](http://127.0.0.1:8080/docs) |
+| Especificação OpenAPI | [http://127.0.0.1:8080/openapi.json](http://127.0.0.1:8080/openapi.json) |
+| Disponibilidade | [http://127.0.0.1:8080/health](http://127.0.0.1:8080/health) |
+
+Esses endereços são locais e dependem da aplicação em execução.
 
 O processo permanece ativo enquanto o servidor está em execução.
 
@@ -527,7 +636,7 @@ Os 24 testes do simulador não automatizam a interface Swagger.
 - A especificação OpenAPI exige manutenção manual.
 - A documentação interativa depende da CDN do Swagger UI.
 - As capturas dependem de uma sessão de navegador disponível.
-- GitHub Actions e hospedagem pública ainda não estão configurados.
+- Hospedagem pública e implantação automática ainda não configuradas.
 
 ## Autora
 
