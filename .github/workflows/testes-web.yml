@@ -1,0 +1,54 @@
+name: Testes Web Java
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    name: Java 17 e Selenium
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    env:
+      HEADLESS: "true"
+
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v7
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Conferir Java e Chrome
+        run: |
+          java -version
+          google-chrome --version
+
+      - name: Permitir execução do Gradle Wrapper
+        run: chmod +x gradlew
+
+      - name: Executar os testes
+        run: ./gradlew --no-daemon --console=plain clean test
+
+      - name: Disponibilizar relatórios e evidências
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: relatorios-testes-web-java
+          path: |
+            build/reports/tests/test/
+            build/test-results/test/
+            build/evidencias/screenshots/
+          if-no-files-found: warn
+          retention-days: 14
