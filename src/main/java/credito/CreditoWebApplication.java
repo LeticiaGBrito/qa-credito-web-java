@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * Servidor independente do simulador educacional.
- * Entrega a interface HTML e recebe solicitações de análise.
+ * Disponibiliza a interface, a análise de crédito e a documentação.
  */
 public class CreditoWebApplication implements AutoCloseable {
 
@@ -34,7 +34,7 @@ public class CreditoWebApplication implements AutoCloseable {
             .create();
 
     /**
-     * Inicializa o servidor local em uma porta fixa ou disponível.
+     * Inicializa o servidor local.
      * A porta zero permite ao sistema escolher uma porta livre.
      */
     public CreditoWebApplication(int porta) throws IOException {
@@ -48,8 +48,7 @@ public class CreditoWebApplication implements AutoCloseable {
             String host,
             int porta
     ) throws IOException {
-        // Carrega o HTML pelo classpath, funcionando também
-        // quando a aplicação estiver empacotada.
+        // Carrega o HTML pelo classpath, inclusive no empacotamento.
         try (var arquivo = CreditoWebApplication.class
                 .getResourceAsStream("/web/index.html")) {
 
@@ -116,6 +115,26 @@ public class CreditoWebApplication implements AutoCloseable {
                 case "/analises-credito" -> {
                     if (validarMetodo(requisicao, "POST")) {
                         analisarCredito(requisicao);
+                    }
+                }
+
+                case "/docs", "/docs/" -> {
+                    if (validarMetodo(requisicao, "GET")) {
+                        responderRecurso(
+                                requisicao,
+                                "/docs/swagger.html",
+                                "text/html; charset=UTF-8"
+                        );
+                    }
+                }
+
+                case "/openapi.json" -> {
+                    if (validarMetodo(requisicao, "GET")) {
+                        responderRecurso(
+                                requisicao,
+                                "/docs/openapi.json",
+                                "application/json; charset=UTF-8"
+                        );
                     }
                 }
 
@@ -276,6 +295,9 @@ public class CreditoWebApplication implements AutoCloseable {
         return valor.getAsBigDecimal();
     }
 
+    /**
+     * Converte objetos Java para uma resposta JSON.
+     */
     private void responderJson(
             HttpExchange requisicao,
             int status,
@@ -292,6 +314,9 @@ public class CreditoWebApplication implements AutoCloseable {
         );
     }
 
+    /**
+     * Define o status, o tipo de conteúdo e o corpo da resposta.
+     */
     private void responder(
             HttpExchange requisicao,
             int status,
@@ -310,11 +335,47 @@ public class CreditoWebApplication implements AutoCloseable {
         }
     }
 
+    /**
+     * Entrega os arquivos de documentação incluídos na aplicação.
+     */
+    private void responderRecurso(
+            HttpExchange requisicao,
+            String caminhoRecurso,
+            String contentType
+    ) throws IOException {
+        try (var arquivo = CreditoWebApplication.class
+                .getResourceAsStream(caminhoRecurso)) {
+
+            if (arquivo == null) {
+                responderJson(
+                        requisicao,
+                        500,
+                        Map.of(
+                                "erro",
+                                "Recurso de documentação não encontrado."
+                        )
+                );
+
+                return;
+            }
+
+            responder(
+                    requisicao,
+                    200,
+                    contentType,
+                    arquivo.readAllBytes()
+            );
+        }
+    }
+
     @Override
     public void close() {
         servidor.stop(0);
     }
 
+    /**
+     * Inicializa a aplicação usando as variáveis HOST e PORT.
+     */
     public static void main(String[] args) throws IOException {
         String host = System.getenv()
                 .getOrDefault("HOST", "127.0.0.1");
@@ -340,6 +401,18 @@ public class CreditoWebApplication implements AutoCloseable {
                 "Simulador local: "
                         + aplicacao.endereco()
                         + "/simulador"
+        );
+
+        System.out.println(
+                "Swagger local: "
+                        + aplicacao.endereco()
+                        + "/docs"
+        );
+
+        System.out.println(
+                "OpenAPI local: "
+                        + aplicacao.endereco()
+                        + "/openapi.json"
         );
 
         System.out.println(

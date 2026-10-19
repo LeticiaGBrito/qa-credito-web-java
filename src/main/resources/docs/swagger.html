@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QA Crédito Web — Java</title>
+
+    <link
+            rel="icon"
+            type="image/svg+xml"
+            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23087f8c'/%3E%3Ctext x='32' y='33' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-size='30' font-weight='700' fill='white'%3ELG%3C/text%3E%3C/svg%3E"
+    >
+
+    <link
+            rel="stylesheet"
+            href="https://unpkg.com/swagger-ui-dist@5.32.0/swagger-ui.css"
+    >
+
+    <style>
+        body {
+          margin: 0;
+          background: #fafafa;
+        }
+
+        .aviso {
+          padding: 14px 20px;
+          background: #e2f2ef;
+          color: #123047;
+          font-family: Arial, sans-serif;
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .aviso a {
+          color: #123047;
+        }
+    </style>
+</head>
+
+<body>
+<div class="aviso">
+    <strong>Projeto educacional.</strong>
+    Utilize somente dados fictícios.
+    As regras não representam políticas reais de concessão de crédito.
+    <a href="/simulador">Abrir simulador</a> ·
+    <a href="/openapi.json">Consultar OpenAPI JSON</a>
+</div>
+
+<div id="swagger-ui"></div>
+
+<noscript>
+    Ative o JavaScript para utilizar a documentação interativa.
+</noscript>
+
+<script
+        src="https://unpkg.com/swagger-ui-dist@5.32.0/swagger-ui-bundle.js"
+        crossorigin="anonymous"
+></script>
+
+<script>
+    window.onload = function () {
+      if (typeof SwaggerUIBundle === "undefined") {
+        document.getElementById("swagger-ui").textContent =
+          "Não foi possível carregar o Swagger UI. "
+          + "Verifique sua conexão com a internet.";
+        return;
+      }
+
+      window.ui = SwaggerUIBundle({
+        url: "/openapi.json",
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        displayRequestDuration: true,
+        validatorUrl: null,
+        persistAuthorization: false,
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: "BaseLayout"
+      });
+    };
+</script>
+</body>
+</html>
