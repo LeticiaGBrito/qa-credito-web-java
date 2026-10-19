@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>QA Crédito | Simulação educacional</title>
+
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23087f8c'/%3E%3Ctext x='32' y='33' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-size='30' font-weight='700' fill='white'%3ELG%3C/text%3E%3C/svg%3E"
+  >
+
+  <style>
+    :root {
+      --fundo: #faf9f6;
+      --azul: #123047;
+      --verde: #087f8c;
+      --texto: #526477;
+      --borda: #dce3e7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+
+    header {
+      border-bottom: 1px solid var(--borda);
+      background: white;
+    }
+
+    .container {
+      width: min(960px, 92%);
+      margin-inline: auto;
+    }
+
+    .marca {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-block: 20px;
+      color: var(--azul);
+      font-weight: bold;
+    }
+
+    .monograma {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--verde);
+      color: white;
+    }
+
+    main {
+      padding-block: 48px;
+    }
+
+    h1,
+    h2 {
+      color: var(--azul);
+      line-height: 1.25;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-family: Georgia, serif;
+      font-size: clamp(30px, 5vw, 42px);
+    }
+
+    .introducao {
+      max-width: 650px;
+      margin-bottom: 30px;
+    }
+
+    .grade {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .painel {
+      min-width: 0;
+      padding: 28px;
+      border: 1px solid var(--borda);
+      border-radius: 14px;
+      background: white;
+    }
+
+    .painel h2 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    .campo {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--azul);
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #8b9ba8;
+      border-radius: 6px;
+      color: var(--azul);
+      background: white;
+      font: inherit;
+    }
+
+    input[aria-invalid="true"] {
+      border-color: #b42318;
+    }
+
+    .ajuda {
+      display: block;
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
+    .erro-campo {
+      display: block;
+      margin-top: 5px;
+      color: #b42318;
+      font-size: 14px;
+    }
+
+    .acoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    button {
+      min-height: 46px;
+      padding: 12px 18px;
+      border: 1px solid var(--verde);
+      border-radius: 6px;
+      background: var(--verde);
+      color: white;
+      font: inherit;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button.secundario {
+      background: white;
+      color: var(--azul);
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--verde);
+      outline-offset: 3px;
+    }
+
+    .resultado {
+      margin-top: 24px;
+      padding: 20px;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+    }
+
+    .resultado h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .resultado.aprovado {
+      background: #edf8f1;
+      border-color: #26834a;
+    }
+
+    .resultado.reprovado {
+      background: #fff7e6;
+      border-color: #a66b00;
+    }
+
+    .resultado.erro {
+      background: #fff0ee;
+      border-color: #b42318;
+    }
+
+    .resultado p {
+      margin: 0;
+    }
+
+    .resultado ul {
+      margin-bottom: 0;
+      padding-left: 22px;
+    }
+
+    .aviso {
+      margin-top: 24px;
+      padding: 16px;
+      border-left: 3px solid var(--verde);
+      background: #e2f2ef;
+      color: var(--azul);
+      font-size: 14px;
+    }
+
+    aside ul {
+      padding-left: 20px;
+    }
+
+    a {
+      color: var(--verde);
+      text-underline-offset: 3px;
+    }
+
+    footer {
+      padding-block: 22px;
+      border-top: 1px solid var(--borda);
+      font-size: 13px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 700px) {
+      .grade {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        padding-block: 30px;
+      }
+
+      .painel {
+        padding: 22px;
+      }
+
+      .acoes {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container marca">
+      <span class="monograma" aria-hidden="true">LG</span>
+      <span>QA Crédito · Laboratório de testes</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Simulação de análise de crédito</h1>
+
+    <p class="introducao">
+      Preencha os dados fictícios para consultar o resultado da análise.
+      Esta interface integra o projeto educacional de testes de software.
+    </p>
+
+    <div class="grade">
+      <section class="painel" aria-labelledby="titulo-formulario">
+        <h2 id="titulo-formulario">Dados da solicitação</h2>
+
+        <form id="formulario-credito" novalidate>
+          <div class="campo">
+            <label for="idade">Idade</label>
+            <input
+              id="idade"
+              name="idade"
+              type="text"
+              inputmode="numeric"
+              aria-describedby="idade-ajuda idade-erro"
+              required
+            >
+            <small id="idade-ajuda" class="ajuda">
+              Informe um número inteiro entre 0 e 120.
+            </small>
+            <span id="idade-erro" class="erro-campo"></span>
+          </div>
+
+          <div class="campo">
+            <label for="rendaMensal">Renda mensal (R$)</label>
+            <input
+              id="rendaMensal"
+              name="rendaMensal"
+              type="text"
+              inputmode="decimal"
+              aria-describedby="renda-ajuda rendaMensal-erro"
+              required
+            >
+            <small id="renda-ajuda" class="ajuda">
+              Exemplo: 3000,00. Não utilize separador de milhares.
+            </small>
+            <span id="rendaMensal-erro" class="erro-campo"></span>
+          </div>
+
+          <div class="campo">
+            <label for="valorSolicitado">Valor solicitado (R$)</label>
+            <input
+              id="valorSolicitado"
+              name="valorSolicitado"
+              type="text"
+              inputmode="decimal"
+              aria-describedby="valor-ajuda valorSolicitado-erro"
+              required
+            >
+            <small id="valor-ajuda" class="ajuda">
+              Exemplo: 10000,00. Aceita vírgula ou ponto decimal.
+            </small>
+            <span id="valorSolicitado-erro" class="erro-campo"></span>
+          </div>
+
+          <div class="acoes">
+            <button id="analisar" type="submit">
+              Analisar crédito
+            </button>
+
+            <button id="limpar" class="secundario" type="reset">
+              Limpar
+            </button>
+          </div>
+        </form>
+
+        <p id="processamento" role="status" hidden>
+          Analisando solicitação…
+        </p>
+
+        <section
+          id="resultado"
+          class="resultado"
+          aria-labelledby="resultado-titulo"
+          aria-live="polite"
+          aria-atomic="true"
+          tabindex="-1"
+          hidden
+        >
+          <h2 id="resultado-titulo"></h2>
+          <p id="resultado-mensagem"></p>
+          <ul id="resultado-motivos" hidden></ul>
+        </section>
+      </section>
+
+      <aside class="painel">
+        <h2>Critérios fictícios</h2>
+
+        <p>Para aprovação, a solicitação deve atender a todos os critérios:</p>
+
+        <ul>
+          <li>Idade igual ou superior a 18 anos.</li>
+          <li>Renda mensal de pelo menos R$ 2.000,00.</li>
+          <li>Valor solicitado de até cinco vezes a renda mensal.</li>
+        </ul>
+
+        <p>
+          Os valores devem ser positivos e ter no máximo duas casas decimais.
+        </p>
+
+        <a href="/docs" target="_blank" rel="noopener noreferrer">
+          Consultar documentação da API ↗
+        </a>
+      </aside>
+    </div>
+
+    <p class="aviso">
+      <strong>Projeto educacional.</strong>
+      Utilize somente dados fictícios. Não se trata de uma oferta
+      de crédito nem de uma política real de concessão.
+    </p>
+  </main>
+
+  <footer>
+    <div class="container">
+      Letícia Gonçalves Garcia · Qualidade de Software
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+
+    const formulario = document.getElementById("formulario-credito");
+    const botaoAnalisar = document.getElementById("analisar");
+    const botaoLimpar = document.getElementById("limpar");
+    const processamento = document.getElementById("processamento");
+    const resultado = document.getElementById("resultado");
+    const titulo = document.getElementById("resultado-titulo");
+    const mensagem = document.getElementById("resultado-mensagem");
+    const motivos = document.getElementById("resultado-motivos");
+
+    const campos = ["idade", "rendaMensal", "valorSolicitado"];
+
+    function limparErros() {
+      for (const nome of campos) {
+        document.getElementById(nome).removeAttribute("aria-invalid");
+        document.getElementById(`${nome}-erro`).textContent = "";
+      }
+    }
+
+    function informarErro(nome, texto) {
+      document.getElementById(nome).setAttribute("aria-invalid", "true");
+      document.getElementById(`${nome}-erro`).textContent = texto;
+    }
+
+    function ocultarResultado() {
+      resultado.hidden = true;
+      resultado.className = "resultado";
+      resultado.removeAttribute("data-status");
+      titulo.textContent = "";
+      mensagem.textContent = "";
+      motivos.replaceChildren();
+      motivos.hidden = true;
+    }
+
+    function exibirResultado(status, texto, lista = []) {
+      resultado.dataset.status = status;
+      resultado.className = `resultado ${status.toLowerCase()}`;
+
+      titulo.textContent = {
+        APROVADO: "Solicitação aprovada",
+        REPROVADO: "Solicitação reprovada",
+        ERRO: "Não foi possível concluir a análise"
+      }[status];
+
+      mensagem.textContent = texto;
+      motivos.replaceChildren();
+
+      for (const motivo of lista) {
+        const item = document.createElement("li");
+        item.textContent = motivo;
+        motivos.appendChild(item);
+      }
+
+      motivos.hidden = lista.length === 0;
+      resultado.hidden = false;
+      resultado.focus();
+    }
+
+    function validarFormulario() {
+      limparErros();
+
+      const dados = {};
+      let primeiroInvalido = null;
+
+      for (const nome of campos) {
+        const campo = document.getElementById(nome);
+        const entrada = campo.value.trim();
+        let erro = "";
+
+        if (!entrada) {
+          erro = "Este campo é obrigatório.";
+        } else if (nome === "idade") {
+          if (!/^\d+$/.test(entrada) || Number(entrada) > 120) {
+            erro = "Informe uma idade inteira entre 0 e 120.";
+          } else {
+            dados.idade = Number(entrada);
+          }
+        } else {
+          const normalizado = entrada.replace(",", ".");
+
+          if (!/^\d+(\.\d{1,2})?$/.test(normalizado)) {
+            erro = "Informe um valor numérico com no máximo duas casas decimais.";
+          } else if (
+            !Number.isFinite(Number(normalizado)) ||
+            Number(normalizado) <= 0
+          ) {
+            erro = "Informe um valor maior que zero e dentro do limite numérico.";
+          } else {
+            // Mantém as casas decimais informadas para montar o JSON.
+            dados[nome] = normalizado.replace(/^0+(?=\d)/, "");
+          }
+        }
+
+        if (erro) {
+          informarErro(nome, erro);
+          primeiroInvalido ??= campo;
+        }
+      }
+
+      if (primeiroInvalido) {
+        primeiroInvalido.focus();
+        return null;
+      }
+
+      return dados;
+    }
+
+    formulario.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+
+      if (botaoAnalisar.disabled) {
+        return;
+      }
+
+      ocultarResultado();
+
+      const dados = validarFormulario();
+
+      if (!dados) {
+        return;
+      }
+
+      botaoAnalisar.disabled = true;
+      botaoLimpar.disabled = true;
+      processamento.hidden = false;
+      formulario.setAttribute("aria-busy", "true");
+
+      const controlador = new AbortController();
+      const temporizador = setTimeout(() => controlador.abort(), 15000);
+
+      try {
+        // Valores monetários são enviados como números JSON,
+        // preservando a representação decimal digitada.
+        const corpo = `{
+          "idade": ${dados.idade},
+          "rendaMensal": ${dados.rendaMensal},
+          "valorSolicitado": ${dados.valorSolicitado}
+        }`;
+
+        const resposta = await fetch("/analises-credito", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: corpo,
+          signal: controlador.signal
+        });
+
+        const conteudo = await resposta.json();
+
+        if (!resposta.ok) {
+          exibirResultado(
+            "ERRO",
+            conteudo.erro || "O servidor não conseguiu processar a solicitação."
+          );
+          return;
+        }
+
+        if (
+          !["APROVADO", "REPROVADO"].includes(conteudo.status) ||
+          !Array.isArray(conteudo.motivos) ||
+          !conteudo.motivos.every((item) => typeof item === "string")
+        ) {
+          throw new Error("Resposta inesperada da API.");
+        }
+
+        exibirResultado(
+          conteudo.status,
+          conteudo.status === "APROVADO"
+            ? "Os dados atendem aos critérios fictícios de aprovação."
+            : "Os dados não atendem a todos os critérios fictícios de aprovação.",
+          conteudo.motivos
+        );
+      } catch (erro) {
+        exibirResultado(
+          "ERRO",
+          erro.name === "AbortError"
+            ? "O tempo de resposta foi excedido. Tente novamente."
+            : "Não foi possível consultar a API. Verifique a conexão e tente novamente."
+        );
+      } finally {
+        clearTimeout(temporizador);
+        botaoAnalisar.disabled = false;
+        botaoLimpar.disabled = false;
+        processamento.hidden = true;
+        formulario.removeAttribute("aria-busy");
+      }
+    });
+
+    formulario.addEventListener("reset", () => {
+      limparErros();
+      ocultarResultado();
+      document.getElementById("idade").focus();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# Arquivos gerados pelo Gradle.
+.gradle/
+build/
+out/
+
+# Configurações locais das IDEs.
+.idea/
+*.iml
+.vscode/
+
+# Configurações e variáveis locais.
+.env
+.env.*
+!.env.example
+
+# Logs.
+*.log
+
+# Arquivos do sistema operacional.
+.DS_Store
+Thumbs.db

@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'br.com.leticia.qa'
+version = '1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClass = 'credito.CreditoWebApplication'
+}
+
+dependencies {
+    // Leitura e geração de JSON pela aplicação.
+    implementation 'com.google.code.gson:gson:2.13.2'
+
+    // Automação do navegador.
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.51.0'
+
+    // Organização e execução dos testes.
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // Inicialização da plataforma de testes pelo Gradle.
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+
+    maxParallelForks = 1
+
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
+
+    systemProperty 'file.encoding', 'UTF-8'
+}
+
+tasks.named('run') {
+    systemProperty 'file.encoding', 'UTF-8'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
