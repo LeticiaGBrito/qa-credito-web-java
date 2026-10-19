@@ -6,13 +6,33 @@ Projeto educacional de automação de testes web com Java, Selenium,
 JUnit 5 e Gradle.
 
 Inclui um simulador de análise fictícia de crédito, servidor próprio,
-documentação Swagger, captura automática de tela em caso de falha
-e execução dos testes no GitHub Actions.
+documentação Swagger, captura automática de tela em caso de falha,
+integração contínua com GitHub Actions e hospedagem no Render com Docker.
 
 A aplicação e suas regras não representam políticas reais de
 concessão de crédito e não possuem vínculo com empresas.
 
 Utilize somente dados fictícios.
+
+## Demonstração pública
+
+| Recurso | Link |
+| --- | --- |
+| Simulador | [Acessar simulador](https://qa-credito-web-java.onrender.com/simulador) |
+| Swagger UI | [Acessar documentação](https://qa-credito-web-java.onrender.com/docs) |
+| OpenAPI | [Consultar especificação](https://qa-credito-web-java.onrender.com/openapi.json) |
+| Disponibilidade | [Consultar health](https://qa-credito-web-java.onrender.com/health) |
+
+A aplicação está hospedada no Render utilizando Docker e Java 17.
+
+No plano gratuito, o serviço pode ficar inativo quando não recebe
+acessos. A primeira requisição após esse período pode demorar
+50 segundos ou mais.
+
+Utilize somente dados fictícios.
+
+Os testes automatizados iniciam sua própria aplicação local
+e não dependem desta demonstração pública.
 
 ## Objetivo
 
@@ -31,6 +51,7 @@ Demonstrar a automação de uma jornada pelo navegador, contemplando:
 - Relatórios HTML e JUnit XML.
 - Captura de tela em falhas.
 - Integração contínua com GitHub Actions.
+- Empacotamento com Docker e publicação da aplicação no Render.
 
 ## Execução independente
 
@@ -60,6 +81,8 @@ Os testes não dependem de uma aplicação hospedada externamente.
 | Swagger UI | Documentação interativa e envio manual de requisições |
 | OpenAPI 3.1 | Descrição dos endpoints, modelos e exemplos |
 | GitHub Actions | Execução automática dos testes e armazenamento dos relatórios |
+| Docker | Empacotamento da aplicação e de seu ambiente de execução |
+| Render | Hospedagem pública da aplicação |
 
 As versões das dependências estão definidas em `build.gradle`.
 
@@ -92,7 +115,7 @@ A versão do Gradle é definida na configuração do Gradle Wrapper.
 | `src/test/java/credito/ComportamentoFormularioTest.java` | Verifica formatos decimais e limpeza do formulário |
 | `src/test/java/credito/AmbienteWebTest.java` | Verifica o controle do Chrome usando uma página simples incluída no teste |
 
-### Configuração
+### Configuração e hospedagem
 
 | Arquivo | Responsabilidade |
 | --- | --- |
@@ -101,6 +124,8 @@ A versão do Gradle é definida na configuração do Gradle Wrapper.
 | `gradlew` e `gradlew.bat` | Permitem executar o Gradle pelo Wrapper |
 | `gradle/wrapper/` | Contém a configuração e os arquivos do Gradle Wrapper |
 | `.github/workflows/testes-web.yml` | Configura a execução dos testes no GitHub Actions |
+| `Dockerfile` | Define a compilação e a execução da aplicação em uma imagem Docker |
+| `.dockerignore` | Exclui arquivos locais e gerados do contexto de construção da imagem |
 | `.gitignore` | Exclui arquivos gerados e configurações locais do versionamento |
 | `.gitattributes` | Padroniza o tratamento de arquivos e quebras de linha |
 
@@ -186,6 +211,8 @@ Os testes são executados sequencialmente na configuração atual.
 
 ## Pré-requisitos
 
+Para executar os testes localmente:
+
 - JDK 17 instalado.
 - Google Chrome instalado.
 - Acesso à internet na primeira execução para baixar o Gradle,
@@ -198,6 +225,11 @@ e em modo headless.
 
 A suíte completa também foi executada com sucesso no GitHub Actions,
 utilizando Ubuntu, Java 17 e Chrome em modo headless.
+
+Docker não é obrigatório para executar os testes ou iniciar
+a aplicação com o Gradle.
+
+Para utilizar apenas a demonstração pública, basta um navegador.
 
 ## Executar toda a suíte
 
@@ -430,10 +462,14 @@ A retenção dos artefatos está configurada para **14 dias**.
 
 ### Escopo da integração
 
-A configuração atual implementa integração contínua: compilação,
+O workflow implementa integração contínua: compilação,
 execução dos testes e disponibilização dos resultados.
 
-Ainda não realiza implantação automática da aplicação.
+A hospedagem da aplicação é realizada separadamente pelo Render.
+
+O YAML atual não contém uma etapa que solicita o deploy.
+O comportamento dos próximos deploys depende da configuração
+`Auto-Deploy` do serviço no Render.
 
 ## Executar o simulador manualmente
 
@@ -468,7 +504,7 @@ A raiz `/` não possui página e retorna HTTP 404.
 
 ### Configuração por variáveis de ambiente
 
-| Variável | Padrão | Finalidade |
+| Variável | Padrão na aplicação | Finalidade |
 | --- | --- | --- |
 | `HOST` | `127.0.0.1` | Endereço de escuta da aplicação |
 | `PORT` | `8080` | Porta da aplicação |
@@ -476,6 +512,74 @@ A raiz `/` não possui página e retorna HTTP 404.
 
 Os testes do simulador criam sua própria aplicação local em porta
 disponível, independentemente do `HOST` e `PORT` da execução manual.
+
+No Dockerfile, `HOST` é definido como `0.0.0.0` para permitir
+o acesso à aplicação pelo ambiente de hospedagem.
+
+A aplicação lê `PORT` do ambiente, permitindo utilizar a porta
+fornecida pela hospedagem.
+
+## Empacotamento e hospedagem com Docker
+
+O `Dockerfile` utiliza duas etapas:
+
+1. Uma imagem com JDK 17 compila e empacota a aplicação.
+2. Uma imagem com JRE 17 executa a aplicação e suas dependências.
+
+O empacotamento utiliza:
+
+```bash
+./gradlew --no-daemon --console=plain installDist
+```
+
+A inicialização executa a classe:
+
+```text
+credito.CreditoWebApplication
+```
+
+O `.dockerignore` exclui do contexto de construção os arquivos
+locais, caches, relatórios e outros itens desnecessários.
+
+Os arquivos necessários à aplicação são gerados novamente
+durante a construção da imagem.
+
+### Conferir o empacotamento local
+
+No Windows PowerShell:
+
+```powershell
+.\gradlew.bat installDist
+```
+
+No Linux ou macOS:
+
+```bash
+bash ./gradlew installDist
+```
+
+Esse comando verifica o empacotamento com Gradle.
+Ele não constrói uma imagem Docker nem executa os testes Selenium.
+
+### Publicação no Render
+
+O serviço utiliza o repositório:
+
+[LeticiaGBrito/qa-credito-web-java](https://github.com/LeticiaGBrito/qa-credito-web-java)
+
+O Render constrói a imagem a partir do `Dockerfile`
+e inicia a aplicação utilizando o comando definido nele.
+
+A demonstração pública executa o simulador e seus endpoints.
+Os testes Selenium são executados localmente ou no GitHub Actions.
+
+O deploy inicial foi concluído com status `Live`.
+
+Na aplicação pública, foram verificados manualmente:
+
+- Aprovação de uma solicitação válida.
+- Reprovação por idade inferior a 18 anos.
+- Disponibilização da especificação OpenAPI.
 
 ## Utilizar o simulador
 
@@ -597,14 +701,17 @@ banco de dados ou serviços externos.
 
 ## Swagger e OpenAPI
 
-Com a aplicação em execução:
+Na demonstração pública, acesse:
 
-1. Acesse `/docs`.
-2. Expanda `POST /analises-credito`.
-3. Clique em `Try it out`.
-4. Selecione um exemplo ou edite o JSON.
-5. Clique em `Execute`.
-6. Confira o código HTTP e o corpo em `Server response`.
+[Swagger UI — Java Web](https://qa-credito-web-java.onrender.com/docs)
+
+Para enviar uma solicitação:
+
+1. Expanda `POST /analises-credito`.
+2. Clique em `Try it out`.
+3. Selecione um exemplo ou edite o JSON.
+4. Clique em `Execute`.
+5. Confira o código HTTP e o corpo em `Server response`.
 
 A interface carrega os arquivos CSS e JavaScript do Swagger UI
 pela CDN, com versão fixada em `5.32.0`.
@@ -619,7 +726,7 @@ As restrições dos modelos OpenAPI não representam todas as
 particularidades da representação decimal recebida pelo servidor.
 
 A abertura do Swagger e o envio de uma análise foram
-verificados manualmente.
+verificados manualmente durante o desenvolvimento local.
 
 Os 24 testes do simulador não automatizam a interface Swagger.
 
@@ -636,7 +743,8 @@ Os 24 testes do simulador não automatizam a interface Swagger.
 - A especificação OpenAPI exige manutenção manual.
 - A documentação interativa depende da CDN do Swagger UI.
 - As capturas dependem de uma sessão de navegador disponível.
-- Hospedagem pública e implantação automática ainda não configuradas.
+- Os testes automatizados utilizam uma instância local, sem validar automaticamente a demonstração pública.
+- A demonstração no plano gratuito pode apresentar demora na primeira resposta após inatividade.
 
 ## Autora
 
