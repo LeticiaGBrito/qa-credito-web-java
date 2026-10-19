@@ -6,8 +6,8 @@ Projeto educacional de automação de testes web com Java, Selenium,
 JUnit 5 e Gradle.
 
 Inclui um simulador de análise fictícia de crédito, servidor próprio,
-documentação Swagger, captura automática de tela em caso de falha,
-integração contínua com GitHub Actions e hospedagem no Render com Docker.
+documentação Swagger, captura automática de tela em caso de falha
+e fluxo de CI/CD com GitHub Actions, Docker e Render.
 
 A aplicação e suas regras não representam políticas reais de
 concessão de crédito e não possuem vínculo com empresas.
@@ -51,7 +51,8 @@ Demonstrar a automação de uma jornada pelo navegador, contemplando:
 - Relatórios HTML e JUnit XML.
 - Captura de tela em falhas.
 - Integração contínua com GitHub Actions.
-- Empacotamento com Docker e publicação da aplicação no Render.
+- Empacotamento com Docker.
+- Implantação automática no Render após aprovação das verificações de CI.
 
 ## Execução independente
 
@@ -82,7 +83,7 @@ Os testes não dependem de uma aplicação hospedada externamente.
 | OpenAPI 3.1 | Descrição dos endpoints, modelos e exemplos |
 | GitHub Actions | Execução automática dos testes e armazenamento dos relatórios |
 | Docker | Empacotamento da aplicação e de seu ambiente de execução |
-| Render | Hospedagem pública da aplicação |
+| Render | Hospedagem e implantação automática após as verificações de CI |
 
 As versões das dependências estão definidas em `build.gradle`.
 
@@ -128,6 +129,9 @@ A versão do Gradle é definida na configuração do Gradle Wrapper.
 | `.dockerignore` | Exclui arquivos locais e gerados do contexto de construção da imagem |
 | `.gitignore` | Exclui arquivos gerados e configurações locais do versionamento |
 | `.gitattributes` | Padroniza o tratamento de arquivos e quebras de linha |
+
+A configuração `After CI Checks Pass` é mantida no painel
+do serviço no Render.
 
 ## Estratégia de testes
 
@@ -460,16 +464,50 @@ A disponibilidade dos arquivos depende do ponto em que ocorreu a falha.
 
 A retenção dos artefatos está configurada para **14 dias**.
 
-### Escopo da integração
+## CI/CD e implantação automática
 
-O workflow implementa integração contínua: compilação,
-execução dos testes e disponibilização dos resultados.
+O fluxo combina a integração contínua do GitHub Actions
+com a implantação automática do Render.
 
-A hospedagem da aplicação é realizada separadamente pelo Render.
+No painel do Render, a opção `Auto-Deploy` está configurada como:
 
-O YAML atual não contém uma etapa que solicita o deploy.
-O comportamento dos próximos deploys depende da configuração
-`Auto-Deploy` do serviço no Render.
+```text
+After CI Checks Pass
+```
+
+### Fluxo de publicação
+
+1. Uma alteração é enviada para a branch `main`.
+2. O GitHub Actions compila o projeto e executa os testes.
+3. O Render aguarda a conclusão das verificações de CI.
+4. Quando as verificações são aprovadas, o Render inicia o deploy.
+5. O Render constrói a imagem a partir do `Dockerfile`.
+6. A aplicação é iniciada e disponibilizada no endereço público.
+
+Verificações com falha impedem o deploy automático daquele commit
+enquanto não forem corrigidas e aprovadas.
+
+A opção do Render considera as conclusões `success`, `neutral`
+e `skipped` como verificações aprovadas. Neste workflow,
+a etapa de testes está configurada para executar normalmente,
+sem ignorar falhas.
+
+Pull requests executam os testes, mas não publicam automaticamente
+suas alterações na demonstração vinculada à branch `main`.
+
+O YAML do GitHub Actions não precisa chamar um Deploy Hook:
+o próprio Render acompanha as verificações do repositório.
+
+### Separação dos ambientes
+
+Os testes executam uma instância local no ambiente de CI.
+
+O Render executa a demonstração pública em uma imagem Docker
+construída separadamente.
+
+Assim, a aprovação dos testes valida os cenários implementados
+antes da publicação, mas não substitui a verificação da aplicação
+após o deploy.
 
 ## Executar o simulador manualmente
 
@@ -573,7 +611,8 @@ e inicia a aplicação utilizando o comando definido nele.
 A demonstração pública executa o simulador e seus endpoints.
 Os testes Selenium são executados localmente ou no GitHub Actions.
 
-O deploy inicial foi concluído com status `Live`.
+O deploy inicial e uma publicação automática posterior
+foram concluídos com status `Live`.
 
 Na aplicação pública, foram verificados manualmente:
 
