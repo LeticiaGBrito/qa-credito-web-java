@@ -316,6 +316,8 @@ public class CreditoWebApplication implements AutoCloseable {
 
     /**
      * Define o status, o tipo de conteúdo e o corpo da resposta.
+     * Requisições HEAD recebem somente os cabeçalhos,
+     * inclusive quando a resposta representa um erro.
      */
     private void responder(
             HttpExchange requisicao,
@@ -327,6 +329,12 @@ public class CreditoWebApplication implements AutoCloseable {
                 "Content-Type",
                 contentType
         );
+
+        if ("HEAD".equals(requisicao.getRequestMethod())) {
+            // -1 informa ao HttpServer que não haverá corpo.
+            requisicao.sendResponseHeaders(status, -1);
+            return;
+        }
 
         requisicao.sendResponseHeaders(status, resposta.length);
 
